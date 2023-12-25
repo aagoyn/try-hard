@@ -14,7 +14,6 @@ namespace LearningManagement.IRepo
         int AddSubmissionDtl(SubmissionDtl submissionDtl, DBContextConfig context);
         int AddSubmission(Submission submission, DBContextConfig context);
         void AddSubmissionDtlFile(SubmissionDtlFile submissionDtlFile, DBContextConfig context);
-
-        //int SaveAnswers(List<QuestionAnswer> answers, int assignmentId, int studentId, int CreatedBy, DateTime CreatedAt, bool IsActive, DBContextConfig context);
+        bool HasSubmission(int assignmentId, int studentId, DBContextConfig context);
     }
 }

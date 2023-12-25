@@ -24,10 +24,6 @@ public class ForumService : IForumService
     {
         forumRepo.CreateForum(newForum);
     }
-    public bool IsForumAvailableForSession(int sessionId)
-    {
-        return forumRepo.IsForumAvailableForSession(sessionId);
-    }
     public List<Forum> GetForum(int sessionId)
     {
         return forumRepo.GetForum(sessionId, context);

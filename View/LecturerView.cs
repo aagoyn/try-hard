@@ -286,8 +286,7 @@ class LecturerView
                     };
 
                     // Tambahkan materi ke sesi
-                    int CreatedBy = loggedInUser.Id;
-                    int newMaterialId = materialService.AddMaterial(newMaterial, CreatedBy);
+                    int newMaterialId = materialService.AddMaterial(newMaterial);
 
                     // Periksa apakah materi memiliki file
                     Console.Write("Apakah materi termasuk file? (y/n): ");

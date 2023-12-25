@@ -5,11 +5,11 @@ namespace LearningManagement.Model;
 [Table("t_submission_dtl_file")]
 public class SubmissionDtlFile : BaseModel
 {
-    [Column("submission_dtl_id")]
-    public int SubmissionDtlId { get; set; }
+    [Column("submission_id")]
+    public int SubmissionId { get; set; }
 
-    [ForeignKey(nameof(SubmissionDtlId))]
-    public SubmissionDtl SubmissionDtl { get; set; }
+    [ForeignKey(nameof(SubmissionId))]
+    public Submission Submission { get; set; }
 
     [Column("submission_file")]
     public int SubmissionFileId { get; set; }

@@ -30,5 +30,10 @@ namespace LearningManagement.Service
 
             materialDtlRepo.AddMaterialDetails(materialDtl, context);
         }
+
+        public List<MaterialDtl> GetMaterialDetailsByMaterialId(int materialId)
+        {
+            return materialDtlRepo.GetMaterialDetailsByMaterialId(materialId, context);
+        }
     }
 }

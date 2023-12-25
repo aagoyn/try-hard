@@ -31,23 +31,6 @@ public class ForumRepo : IForumRepo
         }
     }
 
-    public bool IsForumAvailableForSession(int sessionId)
-    {
-        const string query = "SELECT COUNT(*) FROM t_forum WHERE session_id = @SessionId";
-
-        using (NpgsqlConnection connection = new NpgsqlConnection(ConnectionDB.ConnectionString))
-        {
-            connection.Open();
-            using (NpgsqlCommand command = new NpgsqlCommand(query, connection))
-            {
-                command.Parameters.AddWithValue("@SessionId", sessionId);
-
-                int forumCount = Convert.ToInt32(command.ExecuteScalar());
-                return forumCount > 0;
-            }
-        }
-    }
-
     public int AddContentToForumDtl(ForumDtl newContent, DBContextConfig context)
     {
         context.ForumDtls.Add(newContent);

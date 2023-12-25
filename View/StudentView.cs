@@ -1,4 +1,5 @@
-﻿using LearningManagement.Helper;
+﻿using LearningManagement.Constant;
+using LearningManagement.Helper;
 using LearningManagement.IService;
 using LearningManagement.Model;
 using LearningManagement.Service;
@@ -48,9 +49,9 @@ public class StudentView
         bool isRunning = true;
         while (isRunning)
         {
-            Console.WriteLine("\n--- Student Menu ---\n");
+            Console.WriteLine("\n--- Student Menu ---");
             Console.WriteLine("------------------------");
-            Console.WriteLine($"Halo! {sessionHelper.Fullname}!");
+            Console.WriteLine($"  --WELCOME {sessionHelper.Fullname}!--\n");
             Console.WriteLine("1. Enroll To Class");
             Console.WriteLine("2. My Classes");
             Console.WriteLine("3. Switch User");
@@ -202,24 +203,6 @@ public class StudentView
         }
     }
 
-    //private bool IsForumAvailable(int sessionId)
-    //{
-    //    // Check if forum is available for the given session
-    //    return forumService.IsForumAvailableForSession(sessionId);
-    //}
-
-    //private bool IsAssignmentAvailable(int sessionId)
-    //{
-    //    // Check if assignment is available for the given session
-    //    return assignmentService.IsAssignmentAvailableForSession(sessionId);
-    //}
-
-    //private bool IsMaterialAvailable(int sessionId)
-    //{
-    //    // Check if material is available for the given session
-    //    return materialService.IsMaterialAvailableForSession(sessionId);
-    //}
-
     public void ShowSessions(int learningId)
     {
         List<Session> sessions = sessionService.GetSessionsByLearning(learningId);
@@ -303,7 +286,7 @@ public class StudentView
                             int selectedOption;
                             if (int.TryParse(Console.ReadLine(), out selectedOption) && selectedOption > 0 && selectedOption <= allOptions.Count)
                             {
-                                HandleSelectedOption(allOptions[selectedOption - 1], selectedSession, materials, selectedOption);
+                                HandleSelectedOption(allOptions[selectedOption - 1], selectedSession, materials, selectedOption, learningId);
                             }
                             else
                             {
@@ -332,7 +315,6 @@ public class StudentView
         }
     }
 
-
     private string GetOptionTitle(object option)
     {
         if (option is Forum forum)
@@ -351,39 +333,83 @@ public class StudentView
         return string.Empty;
     }
 
-    private void HandleSelectedOption(object option, Session selectedSession, List<Material> materials, int selectedOption)
+    private void HandleSelectedOption(object option, Session selectedSession, List<Material> materials, int selectedOption, int learningId)
     {
         if (option is Forum forum)
         {
-            ViewForum(selectedSession.Id);
+            ViewForum(selectedSession.Id, learningId);
         }
         else if (option is Material material)
         {
             int materialIndex = materials.IndexOf(material);
-            ViewMaterial(materials, materialIndex);
+            ViewMaterial(materials, materialIndex, learningId);
         }
         else if (option is Assignment assignment)
         {
-            ViewAssignment(selectedSession.Id, assignment.Id);
+            ViewAssignment(selectedSession.Id, assignment.Id, learningId);
         }
     }
 
-    private void ViewMaterial(List<Material> materials, int selectedMaterialIndex)
+    //private void ViewMaterial(List<Material> materials, int selectedMaterialIndex, int learningId)
+    //{
+    //    if (materials != null && selectedMaterialIndex >= 0 && selectedMaterialIndex < materials.Count)
+    //    {
+    //        var selectedMaterial = materials[selectedMaterialIndex];
+
+    //        Console.WriteLine($"You selected Material: {selectedMaterial.MaterialTitle}");
+    //        Console.WriteLine($"Content: {selectedMaterial.MaterialContent}");
+    //        Console.WriteLine("----------------------------");
+    //    }
+    //    else
+    //    {
+    //        Console.WriteLine("Invalid material selection or no materials found for this session.");
+    //    }
+    //    ShowSessions(learningId);
+    //}
+
+    private void ViewMaterial(List<Material> materials, int selectedMaterialIndex, int learningId)
     {
         if (materials != null && selectedMaterialIndex >= 0 && selectedMaterialIndex < materials.Count)
         {
             var selectedMaterial = materials[selectedMaterialIndex];
 
-            Console.WriteLine($"You selected Material: {selectedMaterial.MaterialTitle}");
-            Console.WriteLine($"Content: {selectedMaterial.MaterialContent}");
-            Console.WriteLine("----------------------------");
+            Console.WriteLine($"\n Material Title: {selectedMaterial.MaterialTitle}");
+            Console.WriteLine($"Material Content: {selectedMaterial.MaterialContent}");
+
+            var materialDetails = materialDtlService.GetMaterialDetailsByMaterialId(selectedMaterial.Id);
+
+            if (materialDetails != null && materialDetails.Count > 0)
+            {
+                Console.WriteLine($"\nMaterial File for {selectedMaterial.MaterialTitle}:");
+
+                foreach (var materialDetail in materialDetails)
+                {
+                    if (materialDetail.MaterialFile != null)
+                    {
+                        Console.WriteLine($"- Material File: {materialDetail.MaterialFile.FileTitle}{materialDetail.MaterialFile.FileExtension}");
+                    }
+                    else
+                    {
+                        Console.WriteLine("There are no material files in this material");
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("No material details found for this material.");
+            }
         }
         else
         {
             Console.WriteLine("Invalid material selection or no materials found for this session.");
         }
+
+        ShowSessions(learningId);
     }
-    private void ViewForum(int sessionId)
+
+
+
+    private void ViewForum(int sessionId, int learningId)
     {
         var forums = forumService.GetForum(sessionId);
 
@@ -435,120 +461,170 @@ public class StudentView
         {
             Console.WriteLine("No forum posts found for this session.");
         }
+        ShowSessions(learningId);
     }
 
-    private void ViewAssignment(int sessionId, int assignmentId)
+    private void ViewAssignment(int sessionId, int assignmentId, int learningId)
     {
         var assignment = assignmentService.GetAssignmentById(assignmentId);
 
         if (assignment != null)
         {
+            // cek apakah sudah ada sudah submit assgnmnt ini oleh student ini
+            bool isAlreadySubmitted = submissionService.HasSubmission(assignment.Id, loggedInUser.Id);
+            if (isAlreadySubmitted)
+            {
+                Console.WriteLine("\nYou have already submitted your answers for this assignment.");
+
+                ShowSessions(learningId);
+            }
+
+            //DateTime startTime = DateTime.Now;
+
             var submission = new Submission
             {
                 AssignmentId = assignment.Id,
                 StudentId = loggedInUser.Id,
-                SubmissionGrade = 0.0, // Grade bisa diupdate nanti
-                CreatedBy = loggedInUser.Id,
-                CreatedAt = DateTime.Now,
-                IsActive = true,
+                SubmissionGrade = 0.0, // Grade update later
             };
 
             int submissionId = submissionService.AddSubmission(submission);
 
-            Console.WriteLine($"Title: {assignment.AssignmentTitle}");
+            Console.WriteLine($"\nTitle: {assignment.AssignmentTitle}");
             Console.WriteLine($"Duration: {assignment.AssignmentDuration} minutes");
             Console.WriteLine("--------------------------------------------");
 
             var questions = assignmentService.GetAssignmentDtl(assignment.Id);
+
+            if (questions == null || !questions.Any())
+            {
+                Console.WriteLine("No questions in this assignment.");
+                ShowSessions(learningId);
+            }
+
             List<SubmissionDtl> submissionDetails = new List<SubmissionDtl>();
+            int questionNumber = 1;
             foreach (var question in questions)
             {
-                Console.WriteLine($"Question: {question.Question.QuestionContent} [{question.Question.Id}]");
-                var questionId = assignmentService.GetQuestionById(question.Id);
+                //if (DateTime.Now > startTime.AddMinutes(assignment.AssignmentDuration))
+                //{
+                //    Console.WriteLine("The assignment time has expired!");
+                //    break;
+                //}
 
-                if (question.Question.QuestionType.ToLower() == "multiple choice")
+                Console.WriteLine($"Question {questionNumber}: {question.Question.QuestionContent}");
+                questionNumber++;
+
+                var selectedQuestion = assignmentService.GetQuestionById(question.Id);
+
+                if (question.Question.QuestionType == QuestionType.QuestionMultipleChoice)
                 {
                     var choices = assignmentService.GetQuestionChoicesByQuestionId(question.Id);
                     for (int i = 0; i < choices.Count; i++)
                     {
                         Console.WriteLine($"{i + 1}. {choices[i].OptionAbc}. {choices[i].OptionContent}");
                     }
+
+                    Console.Write("Choose an answer (enter 0 to skip): ");
                     int userChoice;
-                    do
+                    while (!int.TryParse(Console.ReadLine(), out userChoice) || userChoice < 0 || userChoice > choices.Count)
                     {
-                        Console.Write("Pilih jawaban (masukkan nomor pilihan Anda): ");
-                    } while (!int.TryParse(Console.ReadLine(), out userChoice) || userChoice < 1 || userChoice > choices.Count);
+                        if (userChoice == 0)
+                        {
+                            break;
+                        }
+                        Console.WriteLine("Invalid input. Please enter a number between 0 and " + choices.Count);
+                        Console.Write("Choose an answer (enter 0 to skip): ");
+                    }
+
+                    if (userChoice == 0)
+                    {
+                        Console.WriteLine("----------------------------------------");
+                        continue;
+                    }
 
                     var selectedChoice = choices[userChoice - 1];
 
                     var answer = new SubmissionDtl()
                     {
-                        //Material = new Material { Id = newMaterialId },
-                        //MaterialFile = new FileLms { Id = newFileId }
-                        Submission = new Submission { Id = submissionId },
-                        Question = questionId,
-                        SubmissionChoice = selectedChoice,
-                        CreatedBy = loggedInUser.Id,
-                        IsActive = true
+                        SubmissionId = submissionId,
+                        QuestionId = selectedQuestion.Id,
+                        SubmissionChoiceId = selectedChoice.Id,
                     };
                     submissionDetails.Add(answer);
                 }
-                else if (question.Question.QuestionType.ToLower() == "file")
+                else if (question.Question.QuestionType == QuestionType.QuestionFile)
                 {
-                    Console.WriteLine("Masukkan judul file:");
-                    string fileTitle = Console.ReadLine();
-                    Console.WriteLine("Masukkan ekstensi file:");
-                    string fileExtension = Console.ReadLine();
-
-                    FileLms newFile = new FileLms
+                    Console.Write("How many files? ");
+                    int fileCount;
+                    while (!int.TryParse(Console.ReadLine(), out fileCount) || fileCount < 0)
                     {
-                        FileTitle = fileTitle,
-                        FileExtension = fileExtension
-                    };
+                        Console.WriteLine("Invalid input.");
+                        Console.Write("How many files? ");
+                    }
 
-                    int fileId = fileService.CreateFile(fileTitle, fileExtension);
-
-                    var answer = new SubmissionDtlFile()
+                    for (int i = 0; i < fileCount; i++)
                     {
-                        SubmissionDtlId = submissionId,
-                        SubmissionFileId = fileId
-                    };
-                    submissionService.AddSubmissionDtlFile(answer);
+                        Console.Write($"Enter file title {i + 1}: ");
+                        string fileTitle = Console.ReadLine();
+                        Console.Write($"Enter file extension {i + 1}: ");
+                        string fileExtension = Console.ReadLine();
+
+                        FileLms newFile = new FileLms
+                        {
+                            FileTitle = fileTitle,
+                            FileExtension = fileExtension
+                        };
+
+                        int fileId = fileService.CreateFile(fileTitle, fileExtension);
+
+                        var answer = new SubmissionDtlFile()
+                        {
+                            SubmissionId = submissionId,
+                            SubmissionFileId = fileId,
+                        };
+                        submissionService.AddSubmissionDtlFile(answer);
+                    }
                 }
                 else
                 {
-                    Console.Write("Masukkan jawaban Anda: ");
+                    Console.Write("Enter your answer (press Enter to skip): ");
                     string userAnswer = Console.ReadLine();
+
+                    if (string.IsNullOrWhiteSpace(userAnswer))
+                    {
+                        Console.WriteLine("----------------------------------------");
+                        continue;
+                    }
 
                     var answer = new SubmissionDtl()
                     {
+                        SubmissionChoiceId = null,
                         SubmissionId = submissionId,
-                        Question = question.Question,
-                        SubmissionChoice = null,
+                        QuestionId = selectedQuestion.Id,
                         SubmissionContent = userAnswer,
-                        CreatedBy = loggedInUser.Id,
-                        IsActive = true
                     };
 
                     submissionDetails.Add(answer);
                 }
-
-                Console.WriteLine("----------------------------");
+                Console.WriteLine("----------------------------------------");
             }
 
-            foreach (var answer in submissionDetails)
+            if (submissionDetails.Count > 0)
             {
-                submissionService.AddSubmissionDtl(answer);
+                foreach (var answer in submissionDetails)
+                {
+                    submissionService.AddSubmissionDtl(answer);
+                }
+
+                Console.WriteLine("--- Your answers have been submitted! ---");
             }
         }
         else
         {
-            Console.WriteLine("Assignment tidak ditemukan.");
+            Console.WriteLine("Assignment not found.");
         }
+
+        ShowSessions(learningId);
     }
-
-
-
-
-
 }

@@ -9,7 +9,7 @@ public class QuestionChoice : BaseModel
     public int QuestionId { get; set; }
 
     [ForeignKey(nameof(QuestionId))]
-    public Question Question { get; set; }
+    public virtual Question Question { get; set; }
 
     [Column("option_abc", TypeName = "Char(1)")]
     public string OptionAbc { get; set; }
@@ -21,5 +21,5 @@ public class QuestionChoice : BaseModel
     public bool IsCorrect { get; set; }
 
     [NotMapped]
-    public List<QuestionChoice> Choices { get; set; }
+    public virtual List<QuestionChoice> Choices { get; set; }
 }

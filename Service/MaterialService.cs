@@ -1,4 +1,6 @@
-﻿using LearningManagement.IRepo;
+﻿using LearningManagement.DBConfig;
+using LearningManagement.Helper;
+using LearningManagement.IRepo;
 using LearningManagement.IService;
 using LearningManagement.Model;
 
@@ -13,20 +15,24 @@ namespace LearningManagement.Service
     public class MaterialService : IMaterialService
     {
         private readonly IMaterialRepo materialRepo;
+        private readonly SessionHelper sessionHelper;
+        private readonly DBContextConfig context;
 
-        public MaterialService(IMaterialRepo materialRepo)
+        public MaterialService(IMaterialRepo materialRepo, SessionHelper sessionHelper)
         {
+            context = new DBContextConfig();
             this.materialRepo = materialRepo;
+            this.sessionHelper = sessionHelper;
         }
-        public int AddMaterial(Material newMaterial, int CreatedBy)
+        public int AddMaterial(Material newMaterial)
         {
-            return materialRepo.AddMaterial(newMaterial, CreatedBy);
+            newMaterial.CreatedBy = sessionHelper.UserId;
+            newMaterial.CreatedAt = DateTime.Now;
+            newMaterial.IsActive = true;
+
+            return materialRepo.AddMaterial(newMaterial, context);
         }
 
-        public bool IsMaterialAvailableForSession(int sessionId)
-        {
-            return materialRepo.IsMaterialAvailableForSession(sessionId);
-        }
         public List<Material> GetMaterialBySession(int sessionId)
         {
             return materialRepo.GetMaterialBySession(sessionId);

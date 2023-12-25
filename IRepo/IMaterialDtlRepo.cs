@@ -11,5 +11,6 @@ namespace LearningManagement.IRepo
     public interface IMaterialDtlRepo
     {
         void AddMaterialDetails(MaterialDtl materialDtl, DBContextConfig context);
+        List<MaterialDtl> GetMaterialDetailsByMaterialId(int materialId, DBContextConfig context);
     }
 }

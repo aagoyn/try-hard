@@ -15,3 +15,10 @@ public class RoleId
     public const int LecturerRoleId = 3;
     public const int SystemRoleId = 4;
 }
+
+public class QuestionType
+{
+    public const string QuestionMultipleChoice = "Multiple Choice";
+    public const string QuestionEssay = "Essay";
+    public const string QuestionFile = "File";
+}

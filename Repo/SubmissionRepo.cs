@@ -13,6 +13,7 @@ namespace LearningManagement.Repo
 
         public int AddSubmissionDtl(SubmissionDtl submissionDtl, DBContextConfig context)
         {
+
             context.SubmissionDtls.Add(submissionDtl);
             context.SaveChanges();
 
@@ -32,6 +33,12 @@ namespace LearningManagement.Repo
             context.SubmissionDtlFiles.Add(submissionDtlFile);
             context.SaveChanges();
         }
+
+        public bool HasSubmission(int assignmentId, int studentId, DBContextConfig context)
+        {
+            return context.Submissions.Any(s => s.AssignmentId == assignmentId && s.StudentId == studentId);
+        }
+
 
         //public int SaveAnswers(List<QuestionAnswer> answers, int assignmentId, int studentId, int CreatedBy, DateTime CreatedAt, bool IsActive, DBContextConfig context)
         //{

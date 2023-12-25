@@ -21,7 +21,7 @@ public class SubmissionDtl : BaseModel
     public string? SubmissionContent { get; set; }
 
     [Column("submission_choice")]
-    public int SubmissionChoiceId { get; set; }
+    public int? SubmissionChoiceId { get; set; }
 
     [ForeignKey(nameof(SubmissionChoiceId))]
     public QuestionChoice? SubmissionChoice { get; set; }

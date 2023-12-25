@@ -11,8 +11,8 @@ public class MaterialDtl : BaseModel
     public Material Material { get; set; }
 
     [Column("material_file")]
-    public int MaterialFileId { get; set; }
+    public int? MaterialFileId { get; set; }
 
     [ForeignKey(nameof(MaterialFileId))]
-    public FileLms MaterialFile { get; set; }
+    public FileLms? MaterialFile { get; set; }
 }

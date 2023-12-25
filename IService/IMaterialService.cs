@@ -9,8 +9,7 @@ namespace LearningManagement.IService
 {
     public interface IMaterialService
     {
-        int AddMaterial(Material newMaterial, int CreatedBy);
-        bool IsMaterialAvailableForSession(int sessionId);
+        int AddMaterial(Material newMaterial);
         List<Material> GetMaterialBySession(int sessionId);
 
     }

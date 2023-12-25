@@ -32,4 +32,12 @@ public class MaterialDtlRepo : IMaterialDtlRepo
         //    }
         //}
     }
+
+    public List<MaterialDtl> GetMaterialDetailsByMaterialId(int materialId, DBContextConfig context)
+    {
+        return context.MaterialDtls
+            .Where(md => md.MaterialId == materialId)
+            .Include(md => md.MaterialFile)
+            .ToList();
+    }
 }
