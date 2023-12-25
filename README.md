@@ -1,1 +1,1 @@
-apalah ajg pusing gw
+duh
